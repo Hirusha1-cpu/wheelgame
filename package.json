@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.2.7",
+    "@solana/web3.js": "^1.95.2",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.3",
     "lucide": "^0.420.0",
@@ -23,6 +25,7 @@
     "react-countdown": "^2.3.5",
     "react-dom": "^18",
     "react-live-clock": "^6.1.23-beta",
+    "react-redux": "^9.1.2",
     "react-use": "^17.5.1"
   },
   "devDependencies": {

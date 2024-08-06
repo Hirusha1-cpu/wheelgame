@@ -1,14 +1,14 @@
-import React from "react";
 import { History } from "lucide-react";
+import React from "react";
 
-const ChartItems = () => {
+const ChartItems = ({ roundNumber }: any) => {
   return (
     <div className="flex justify-between px-4 pt-4">
-      <h4 className="uppercase font-bold text-md">Round #698979</h4>
+      <h4 className="text-md font-bold uppercase">Round #{roundNumber}</h4>
 
-      <div className="flex items-center gap-2 border rounded-lg p-1">
+      <div className="flex items-center gap-2 rounded-lg border p-1">
         <History className="size-6" />
-        <h4 className="font-bold text-md">History</h4>
+        <h4 className="text-md font-bold">History</h4>
       </div>
     </div>
   );

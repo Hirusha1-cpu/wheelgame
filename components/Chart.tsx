@@ -1,27 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Chart as ChartTS, ArcElement } from "chart.js";
+
+import { ArcElement, Chart as ChartTS } from "chart.js";
+import React, { useEffect, useRef, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement);
 
-const Chart = () => {
-  const data = {
-    labels: ["Red", "Blue", "Yellow"],
-    datasets: [
-      {
-        label: "My First Dataset",
-        data: [300, 50, 100],
-        backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
-        ],
-        hoverOffset: 4,
-        borderWidth: 0,
-      },
-    ],
-  };
-
+const Chart = ({ chartData }: any) => {
   const [chartAnimate, setChartAnimate] = useState<boolean>(true);
 
   setTimeout(() => {
@@ -47,7 +31,7 @@ const Chart = () => {
         className={`h-[420px] w-[420px] rounded-full border-8 border-pink-600 p-5 ${chartAnimate ? "animate-spin" : ""}`}
       >
         <Doughnut
-          data={data}
+          data={chartData}
           width={420}
           height={420}
           options={{ maintainAspectRatio: false }}
