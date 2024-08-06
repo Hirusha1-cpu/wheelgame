@@ -1,11 +1,15 @@
 "use client";
 
+import { selectCount, selectStatus } from "@/lib/features/counter/counterSlice";
+import { useAppSelector } from "@/lib/hooks";
 import { ArcElement, Chart as ChartTS } from "chart.js";
 import React, { useEffect, useRef, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement);
 
 const Chart = ({ chartData }: any) => {
+  const count = useAppSelector(selectCount);
+  const status = useAppSelector(selectStatus);
   const [chartAnimate, setChartAnimate] = useState<boolean>(true);
 
   setTimeout(() => {

@@ -1,8 +1,10 @@
 "use client";
 
+import { incrementByAmount } from "@/lib/features/counter/counterSlice";
+import { useAppDispatch } from "@/lib/hooks";
 import { History } from "lucide-react";
 import { Cherry } from "lucide-react";
-import React from "react";
+import React, { ChangeEvent, useState } from "react";
 import Clock from "react-live-clock";
 
 const CheckList = ({
@@ -11,6 +13,13 @@ const CheckList = ({
   winChance,
   yourEntries,
 }: any) => {
+  const [amount, setAmount] = useState(0);
+  const dispatch = useAppDispatch();
+
+  const handleSetAmount = (event: ChangeEvent<HTMLInputElement>) => {
+    setAmount(Number(event.target.value));
+  };
+
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
@@ -59,6 +68,7 @@ const CheckList = ({
         <h2 className="p-3 text-2xl font-bold">DEPOSIT</h2>
         <input
           type="number"
+          onChange={handleSetAmount}
           className="mx-auto w-[340px] rounded-md bg-transparent py-3 outline"
         />
         <button className="mt-4 w-full rounded-lg bg-yellow-400 p-3 font-bold text-black">
