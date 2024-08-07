@@ -1,15 +1,15 @@
 "use client";
 
-import { selectCount, selectStatus } from "@/lib/features/counter/counterSlice";
+import { selectChartData, selectSolAmount } from "@/lib/features/mainSlice";
 import { useAppSelector } from "@/lib/hooks";
 import { ArcElement, Chart as ChartTS } from "chart.js";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement);
 
-const Chart = ({ chartData }: any) => {
-  const count = useAppSelector(selectCount);
-  const status = useAppSelector(selectStatus);
+const Chart = () => {
+  const solAmount = useAppSelector(selectSolAmount);
+  const chartData = useAppSelector(selectChartData);
   const [chartAnimate, setChartAnimate] = useState<boolean>(true);
 
   setTimeout(() => {
@@ -47,6 +47,7 @@ const Chart = ({ chartData }: any) => {
           {`${String(time % 60)}`.padStart(2, "0")}
         </h2>
         <p className="font-bold">Drawing Timer</p>
+        <p className="font-bold">{solAmount}</p>
       </div>
     </div>
   );

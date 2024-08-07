@@ -3,11 +3,11 @@ import React from "react";
 import Chart from "./Chart";
 import ChartItems from "./ChartItems";
 
-const Chartcomponents = ({ chartData, roundNumber }: any) => {
+const Chartcomponents = () => {
   return (
     <>
-      <ChartItems roundNumber={roundNumber} />
-      <Chart chartData={chartData} />
+      <ChartItems />
+      <Chart />
     </>
   );
 };

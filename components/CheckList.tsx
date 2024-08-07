@@ -1,23 +1,29 @@
 "use client";
 
-import { incrementByAmount } from "@/lib/features/counter/counterSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import {
+  selectNumberOfPlayers,
+  selectPricePool,
+  selectSolAmount,
+  selectWinChance,
+  selectYourEntries,
+  setSolAmount,
+} from "@/lib/features/mainSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { History } from "lucide-react";
 import { Cherry } from "lucide-react";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent } from "react";
 import Clock from "react-live-clock";
 
-const CheckList = ({
-  numberOfPlayers,
-  pricePool,
-  winChance,
-  yourEntries,
-}: any) => {
-  const [amount, setAmount] = useState(0);
+const CheckList = ({}: any) => {
+  const solAmount = useAppSelector(selectSolAmount);
+  const pricePool = useAppSelector(selectPricePool);
+  const numberOfPlayers = useAppSelector(selectNumberOfPlayers);
+  const winChance = useAppSelector(selectWinChance);
+  const yourEntries = useAppSelector(selectYourEntries);
   const dispatch = useAppDispatch();
 
   const handleSetAmount = (event: ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(event.target.value));
+    dispatch(setSolAmount(event.target.value));
   };
 
   return (
@@ -68,6 +74,7 @@ const CheckList = ({
         <h2 className="p-3 text-2xl font-bold">DEPOSIT</h2>
         <input
           type="number"
+          value={solAmount}
           onChange={handleSetAmount}
           className="mx-auto w-[340px] rounded-md bg-transparent py-3 outline"
         />
