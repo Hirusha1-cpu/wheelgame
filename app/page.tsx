@@ -15,7 +15,6 @@ import { useAppDispatch } from "@/lib/hooks";
 import { useEffect } from "react";
 
 export default function Home() {
-  // const solAmount = useAppSelector(selectSolAmount);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
