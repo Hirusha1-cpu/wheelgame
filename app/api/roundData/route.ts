@@ -13,7 +13,7 @@ export async function GET() {
       pricePool,
       numberOfPlayers: 6,
       yourEntries,
-      players: [],
+      players: ["Ranga", "Zoro", "Luffy"],
       status: "open",
       winner: null,
       winChance: yourEntries / pricePool,
