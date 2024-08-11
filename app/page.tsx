@@ -18,16 +18,18 @@ export default function Home() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    fetch("/api/roundData").then((res) => {
-      res.json().then((data) => {
-        dispatch(setChartData(data?.chartData));
-        dispatch(setRoundNumber(data?.roundNumber));
-        dispatch(setNumberOfPlayers(data?.numberOfPlayers));
-        dispatch(setPricePool(data?.pricePool));
-        dispatch(setWinChance(data?.winChance));
-        dispatch(setYourEntries(data?.yourEntries));
+    setInterval(() => {
+      fetch("/api/roundData").then((res) => {
+        res.json().then((data) => {
+          dispatch(setChartData(data?.chartData));
+          dispatch(setRoundNumber(data?.roundNumber));
+          dispatch(setNumberOfPlayers(data?.numberOfPlayers));
+          dispatch(setPricePool(data?.pricePool));
+          dispatch(setWinChance(data?.winChance));
+          dispatch(setYourEntries(data?.yourEntries));
+        });
       });
-    });
+    }, 5000);
   }, [dispatch]);
 
   return (
