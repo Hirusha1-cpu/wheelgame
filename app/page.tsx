@@ -12,7 +12,7 @@ import {
   setYourEntries,
 } from "@/lib/features/mainSlice";
 import { useAppDispatch } from "@/lib/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const dispatch = useAppDispatch();
