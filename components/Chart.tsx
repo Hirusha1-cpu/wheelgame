@@ -2,10 +2,10 @@
 
 import { selectChartData, selectSolAmount } from "@/lib/features/mainSlice";
 import { useAppSelector } from "@/lib/hooks";
-import { ArcElement, Chart as ChartTS } from "chart.js";
+import { ArcElement, Chart as ChartTS, Tooltip } from "chart.js";
 import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
-ChartTS.register(ArcElement);
+ChartTS.register(ArcElement, Tooltip); // Register Tooltip
 
 const Chart = () => {
   const solAmount = useAppSelector(selectSolAmount);
@@ -81,13 +81,25 @@ const Chart = () => {
     }
   };
 
-  // Create custom chart options to handle spinning and stopping
+  // Create custom chart options to handle spinning and stopping, including tooltip configuration
   const options = {
     maintainAspectRatio: false,
     rotation: -totalRotation, // Ensure clockwise rotation
     animation: {
       duration: chartAnimate ? 5000 : 0,
       easing: "easeOutCubic", // Smooth deceleration
+    },
+    plugins: {
+      tooltip: {
+        enabled: true, // Enable tooltip
+        callbacks: {
+          label: (tooltipItem: any) => {
+            const label = tooltipItem.label || "";
+            const value = tooltipItem.raw;
+            return `${label}: ${value}`;
+          },
+        },
+      },
     },
   };
 
@@ -100,7 +112,7 @@ const Chart = () => {
         <h2 className="absolute -top-2 left-1/2 -translate-x-1/2 transform text-white text-xl">
           &#x25BC;
         </h2>
-        <div className={`h-[400px] w-[400px]`}>
+        <div className={`h-[400px] w-[400px] z-10 cursor-pointer relative`}>
           <Doughnut data={chartData} width={400} height={400} options={options} />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
