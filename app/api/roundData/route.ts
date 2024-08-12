@@ -1,6 +1,7 @@
+import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
-const duration = 0;
+const duration = 10000;
 
 interface Player {
   address: string;
@@ -44,18 +45,18 @@ const dbData: {
 } = {
   0: {
     players: [
-      { address: "address1", entries: 2 },
-      { address: "address1", entries: 2 },
-      { address: "address1", entries: 2 },
-      { address: "address1", entries: 2 },
-      { address: "address1", entries: 2 },
-      { address: "address1", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
       { address: "address2", entries: 3 },
       { address: "address2", entries: 3 },
       { address: "address2", entries: 3 },
       { address: "address2", entries: 3 },
-      { address: "address1", entries: 1 },
-      { address: "address1", entries: 1 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 1 },
+      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 1 },
       { address: "address3", entries: 1 },
       { address: "address4", entries: 1 },
       { address: "address4", entries: 1 },
@@ -65,22 +66,24 @@ const dbData: {
   currentRound: 0,
 };
 
-export async function GET() {
-  // Do whatever you want
-  const yourEntries = 2;
+function getCurrentRound(dbData: any) {
+  return dbData.currentRound;
+}
 
-  const currentRound = dbData.currentRound;
-  const strtTimestamp = dbData[currentRound].startTimeStamp;
+export async function GET(req: NextApiRequest) {
+  const { searchParams } = new URL(req.url);
+  const currentUserAddress = searchParams.get("me");
 
-  const playerEntries: PlayerEntries = dbData[currentRound].players.reduce(
-    (acc, player) => {
-      acc[player.address] = (acc[player.address] || 0) + player.entries;
-      return acc;
-    },
-    {} as PlayerEntries,
-  );
+  const strtTimestamp = dbData[getCurrentRound(dbData)].startTimeStamp;
 
-  const pricePool: number = Object.values(playerEntries).reduce(
+  let playerEntries: PlayerEntries = dbData[
+    getCurrentRound(dbData)
+  ].players.reduce((acc, player) => {
+    acc[player.address] = (acc[player.address] || 0) + player.entries;
+    return acc;
+  }, {} as PlayerEntries);
+
+  let pricePool: number = Object.values(playerEntries).reduce(
     (sum, entries) => sum + entries,
     0,
   );
@@ -96,22 +99,44 @@ export async function GET() {
     winner = null;
     const currentRound = dbData.currentRound + 1;
     dbData[currentRound] = {
-      players: [],
+      players: [
+        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
+        { address: "address2", entries: 3 },
+        { address: "address3", entries: 3 },
+        { address: "address2", entries: 3 },
+      ],
       startTimeStamp: Date.now(),
     };
     dbData.currentRound = currentRound;
     dbData[currentRound].startTimeStamp = Date.now();
   }
 
+  playerEntries = dbData[getCurrentRound(dbData)].players.reduce(
+    (acc, player) => {
+      acc[player.address] = (acc[player.address] || 0) + player.entries;
+      return acc;
+    },
+    {} as PlayerEntries,
+  );
+
+  pricePool = Object.values(playerEntries).reduce(
+    (sum, entries) => sum + entries,
+    0,
+  );
+
+  const yourEntries = playerEntries[currentUserAddress] || 0;
+
   return NextResponse.json(
     {
-      roundNumber: currentRound,
+      roundNumber: getCurrentRound(dbData),
       pricePool: pricePool,
       numberOfPlayers: Object.keys(playerEntries).length,
       yourEntries,
       players: Object.keys(playerEntries),
       status,
-      winner: winner,
+      winner,
       winChance: yourEntries / pricePool,
       chartData: {
         labels: Object.keys(playerEntries),
