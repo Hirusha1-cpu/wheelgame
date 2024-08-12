@@ -71,7 +71,7 @@ function getCurrentRound(dbData: any) {
 }
 
 export async function GET(req: NextApiRequest) {
-  const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req.url!);
   const currentUserAddress = searchParams.get("me");
 
   const strtTimestamp = dbData[getCurrentRound(dbData)].startTimeStamp;
@@ -126,7 +126,7 @@ export async function GET(req: NextApiRequest) {
     0,
   );
 
-  const yourEntries = playerEntries[currentUserAddress] || 0;
+  const yourEntries = playerEntries[currentUserAddress!] || 0;
 
   return NextResponse.json(
     {
