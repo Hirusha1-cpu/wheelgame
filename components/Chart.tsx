@@ -10,41 +10,52 @@ ChartTS.register(ArcElement);
 const Chart = () => {
   const solAmount = useAppSelector(selectSolAmount);
   const chartData = useAppSelector(selectChartData);
-  const initialSeconds = 3; // Define the initialSeconds variable
+  const initialSeconds = 10;
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(initialSeconds);
-  const [stopPosition, setStopPosition] = useState<number>(0); // To store the stop position
-  const [spinCount, setSpinCount] = useState<number>(0); // Track the number of spins
+  const [stopPosition, setStopPosition] = useState<number>(0);
+  const [totalRotation, setTotalRotation] = useState<number>(0); // Track total rotation
+  const [borderColor, setBorderColor] = useState<string>("white"); // Default white color
+  const [spinEnded, setSpinEnded] = useState<boolean>(false); // Track if spin has ended
 
   useEffect(() => {
     if (seconds > 0) {
       const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
-      return () => clearTimeout(timer); // Clean up the timer
+      return () => clearTimeout(timer);
     } else {
-      setSpinCount(10); // Start 10 spins after countdown ends
+      const randomStop = Math.floor(Math.random() * 360); // Random stop position
+      setStopPosition(randomStop);
       setChartAnimate(true);
-      // Random stop position after spins are complete
-      setStopPosition(Math.floor(Math.random() * 360));
+      setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
     }
   }, [seconds]);
 
   useEffect(() => {
-    if (spinCount > 0) {
-      const timer = setTimeout(() => setSpinCount(spinCount - 1), 500); // Duration for each spin
-      return () => clearTimeout(timer); // Clean up the timer
-    } else {
-      setChartAnimate(false); // Stop spinning when spins are done
+    if (chartAnimate) {
+      const timer = setTimeout(() => {
+        setChartAnimate(false);
+        setSpinEnded(true); // Mark spin as ended
+        calculateWinnerColor();
+      }, 5000); // Spin duration
+      return () => clearTimeout(timer);
     }
-  }, [spinCount]);
+  }, [chartAnimate]);
 
   useEffect(() => {
-    // Reset countdown and spin position when component mounts
-    setSeconds(initialSeconds);
-    setSpinCount(0);
-    setChartAnimate(false);
-    setStopPosition(Math.floor(Math.random() * 360));
-  }, []);
+    if (spinEnded) {
+      const resetTimer = setTimeout(() => {
+        // Reset countdown, rotation, and spinEnded after 5 seconds
+        setSeconds(initialSeconds);
+        setChartAnimate(false);
+        setStopPosition(0);
+        setTotalRotation(0);
+        setBorderColor("white"); // Ensure the border starts as white
+        setSpinEnded(false); // Reset spin ended status
+      }, 5000);
+      return () => clearTimeout(resetTimer);
+    }
+  }, [spinEnded]);
 
   const formatTime = (secs: number): string => {
     const minutes = Math.floor(secs / 60);
@@ -52,43 +63,59 @@ const Chart = () => {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-  // Calculate total rotation based on the number of spins
-  const totalRotation = spinCount * 360 + stopPosition;
+  // Calculate the winning color and update the border color
+  const calculateWinnerColor = () => {
+    const data = chartData.datasets[0].data;
+    const colors = chartData.datasets[0].backgroundColor;
+    let cumulativeAngle = 0;
+    const stopAngle = stopPosition;
+
+    for (let i = 0; i < data.length; i++) {
+      const segmentAngle = (data[i] / data.reduce((a, b) => a + b, 0)) * 360;
+      cumulativeAngle += segmentAngle;
+
+      if (stopAngle <= cumulativeAngle) {
+        setBorderColor(colors[i]);
+        break;
+      }
+    }
+  };
 
   // Create custom chart options to handle spinning and stopping
   const options = {
     maintainAspectRatio: false,
-    rotation: -totalRotation, // Negative for clockwise rotation
+    rotation: -totalRotation, // Ensure clockwise rotation
     animation: {
-      duration: chartAnimate ? 5000 : 0, // Adjust the animation duration for smoothness
-      easing: 'easeOutCubic', // Smooth deceleration
-      onComplete: () => {
-        if (!chartAnimate) {
-          setSpinCount(10); // Restart the spin cycle
-        }
-      },
+      duration: chartAnimate ? 5000 : 0,
+      easing: "easeOutCubic", // Smooth deceleration
     },
   };
 
   return (
     <div className="flex h-full w-full items-center justify-center">
-      <div className={`relative rounded-full border-8 border-pink-600 p-5`}>
-        <h2 className="absolute -top-2 left-1/2 -translate-x-1/2 transform text-pink-600 text-xl">
+      <div
+        className="relative rounded-full border-8 p-5"
+        style={{ borderColor: borderColor }} // Start with white, change to winner color
+      >
+        <h2 className="absolute -top-2 left-1/2 -translate-x-1/2 transform text-white text-xl">
           &#x25BC;
         </h2>
-        <div
-          className={`h-[400px] w-[400px]`}
-        >
-          <Doughnut
-            data={chartData}
-            width={400}
-            height={400}
-            options={options}
-          />
+        <div className={`h-[400px] w-[400px]`}>
+          <Doughnut data={chartData} width={400} height={400} options={options} />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <h2 className="text-4xl font-bold">{formatTime(seconds)}</h2>
-          <p className="font-bold">Drawing Timer</p>
+          {chartAnimate ? (
+            <h2 className="text-4xl font-bold">Wait</h2>
+          ) : spinEnded ? (
+            <h2 className="text-4xl font-bold" style={{ color: borderColor }}>
+              WON
+            </h2>
+          ) : (
+            <>
+              <h2 className="text-4xl font-bold">{formatTime(seconds)}</h2>
+              <p className="font-bold">Drawing Timer</p>
+            </>
+          )}
           <p className="font-bold">{solAmount}</p>
         </div>
       </div>
