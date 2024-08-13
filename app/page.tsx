@@ -33,7 +33,7 @@ export default function Home() {
         dispatch(setYourEntries(data?.yourEntries));
       });
     });
-  }, 5000);
+  }, 2000);
 
   return (
     <div className="custom-height mx-auto max-w-[90rem]">
