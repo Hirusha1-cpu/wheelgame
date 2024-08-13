@@ -7,6 +7,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import React, { useEffect } from "react";
+import { Cherry } from "lucide-react";
 
 interface Window {
   open(arg0: string, arg1: string): unknown;
@@ -14,6 +15,7 @@ interface Window {
     solana?: {
       isPhantom?: boolean;
       connect(): Promise<{ publicKey: PublicKey }>;
+      disconnect(): Promise<void>;
       signTransaction(transaction: Transaction): Promise<Transaction>;
       on(event: string, callback: (arg: any) => void): void;
       off(event: string, callback: (arg: any) => void): void;
@@ -43,9 +45,14 @@ const NavBar = () => {
   const handleConnect = async (): Promise<void> => {
     try {
       const provider = getProvider();
-      const resp = await provider.connect();
-      dispatch(setWallet(resp.publicKey.toString()));
-      dispatch(setError(""));
+      if (wallet) {
+        await provider.disconnect();
+        dispatch(setWallet("")); // Clear the wallet state
+      } else {
+        const resp = await provider.connect();
+        dispatch(setWallet(resp.publicKey.toString()));
+        dispatch(setError(""));
+      }
     } catch (err) {
       dispatch(setError((err as Error).message));
     }
@@ -60,7 +67,7 @@ const NavBar = () => {
       };
 
       const handleDisconnect = () => {
-        dispatch(setError("Phantom wallet disconnected"));
+        dispatch(setWallet("")); // Just clear the wallet without setting an error
       };
 
       const handleAccountChanged = async (publicKey: PublicKey | null) => {
@@ -88,15 +95,23 @@ const NavBar = () => {
         provider.off("accountChanged", handleAccountChanged);
       };
     }
-  }, []);
+  }, [wallet, dispatch]);
 
   return (
     <div className="w-full bg-[#1C1C1E] px-5 py-3 flex items-center justify-between">
-      <h1 className="text-2xl text-[#ab9ff2] font-bold cursor-pointer">Logo Here</h1>
+      <div className="cursor-pointer flex items-end gap-2">
+      <Cherry className="h-8 w-8 text-red-500" />
+      <h1 className="text-xl text-white font-bold uppercase">che bet</h1>
+      </div>
       <div className="flex flex-row-reverse items-center gap-4">
-        <button onClick={handleConnect} className="hover:bg-[#ab9ff2] px-4 py-1 rounded-3xl text-white border-white border-[2px] bg-transparent ease-linear duration-200 hover:scale-105 hover:font-bold hover:text-[#1C1C1E] hover:border-[#ab9ff2]">Connect</button>
-        {wallet && <p>Connected: {wallet}</p>}
-        {error && <p>Error: {error}</p>}
+        <button
+          onClick={handleConnect}
+          className="hover:bg-[#ab9ff2] px-4 py-1 rounded-3xl text-white border-white border-[2px] bg-transparent ease-linear duration-200 hover:scale-105 hover:font-bold hover:text-[#1C1C1E] hover:border-[#ab9ff2]"
+        >
+          {wallet ? "Disconnect" : "Connect"}
+        </button>
+        {wallet && <p className="text-[12px]">Connected: {wallet}</p>}
+        {error && <p className="text-[12px]">Error: {error}</p>}
       </div>
     </div>
   );
