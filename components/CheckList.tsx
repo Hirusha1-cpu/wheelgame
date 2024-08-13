@@ -210,7 +210,7 @@ const CheckList = ({}: any) => {
           type="number"
           value={solAmount}
           onChange={handleSetAmount}
-          className="mx-auto w-[340px] rounded-md bg-transparent p-3 outline-none border-white border-[4px] font-bold"
+          className="mx-auto w-[340px] rounded-md bg-transparent py-3 px-5 outline-none border-white border-[4px] font-bold text-xl"
         />
         <button
           onClick={sendSol}
