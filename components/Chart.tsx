@@ -8,7 +8,7 @@ import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement, Tooltip); // Register Tooltip
 
 const Chart = () => {
-  const solAmount = useAppSelector(selectSolAmount);
+  let solAmount = Number(useAppSelector(selectSolAmount));
   const chartData = useAppSelector(selectChartData);
   const initialSeconds = 10;
 
@@ -103,6 +103,11 @@ const Chart = () => {
     },
   };
 
+  solAmount=0;
+  for(let i=0;(chartData.datasets[0].data).length>i;i++){
+    solAmount=solAmount+chartData.datasets[0].data[i];
+  }
+
   return (
     <div className="flex h-full w-full items-center justify-center">
       <div
@@ -116,19 +121,7 @@ const Chart = () => {
           <Doughnut data={chartData} width={400} height={400} options={options} />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {chartAnimate ? (
-            <h2 className="text-4xl font-bold">Wait</h2>
-          ) : spinEnded ? (
-            <h2 className="text-4xl font-bold" style={{ color: borderColor }}>
-              WON
-            </h2>
-          ) : (
-            <>
-              <h2 className="text-4xl font-bold">{formatTime(seconds)}</h2>
-              <p className="font-bold">Drawing Timer</p>
-            </>
-          )}
-          <p className="font-bold">{solAmount}</p>
+          <p className="font-bold text-4xl">{solAmount}SOL</p>
         </div>
       </div>
     </div>

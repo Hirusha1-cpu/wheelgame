@@ -94,7 +94,7 @@ const NavBar = () => {
     <div className="w-full bg-[#1C1C1E] p-5 flex items-center justify-between">
       <h1 className="text-2xl text-white font-bold">Logo Here</h1>
       <div className="flex flex-row-reverse items-center gap-4">
-        <button onClick={handleConnect} className="hover:bg-[#5842c3] px-4 py-2 rounded-3xl text-white border-white border-[2px] bg-transparent ease-linear duration-100 hover:scale-105 hover:font-bold">Connect</button>
+        <button onClick={handleConnect} className="hover:bg-[#ab9ff2] px-4 py-2 rounded-3xl text-white border-white border-[2px] bg-transparent ease-linear duration-200 hover:scale-105 hover:font-bold hover:text-[#1C1C1E] hover:border-[#ab9ff2]">Connect</button>
         {wallet && <p>Connected: {wallet}</p>}
         {error && <p>Error: {error}</p>}
       </div>

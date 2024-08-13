@@ -20,7 +20,7 @@ import {
 } from "@solana/web3.js";
 import { History } from "lucide-react";
 import { Cherry } from "lucide-react";
-import React, { ChangeEvent, useCallback } from "react";
+import React, { ChangeEvent, useCallback,useState,useEffect } from "react";
 import Clock from "react-live-clock";
 
 interface Window {
@@ -108,6 +108,57 @@ const CheckList = ({}: any) => {
     }
   }, [wallet, solAmount]);
 
+  // countdown timer
+  const initialSeconds = 10;
+  const [chartAnimate, setChartAnimate] = useState<boolean>(false);
+  const [seconds, setSeconds] = useState<number>(initialSeconds);
+  const [stopPosition, setStopPosition] = useState<number>(0);
+  const [totalRotation, setTotalRotation] = useState<number>(0); // Track total rotation
+  const [borderColor, setBorderColor] = useState<string>("white"); // Default white color
+  const [spinEnded, setSpinEnded] = useState<boolean>(false); // Track if spin has ended
+
+  useEffect(() => {
+    if (seconds > 0) {
+      const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      const randomStop = Math.floor(Math.random() * 360); // Random stop position
+      setStopPosition(randomStop);
+      setChartAnimate(true);
+      setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
+    }
+  }, [seconds]);
+
+  useEffect(() => {
+    if (chartAnimate) {
+      const timer = setTimeout(() => {
+        setChartAnimate(false);
+        setSpinEnded(true); // Mark spin as ended
+      }, 5000); // Spin duration
+      return () => clearTimeout(timer);
+    }
+  }, [chartAnimate]);
+
+  useEffect(() => {
+    if (spinEnded) {
+      const resetTimer = setTimeout(() => {
+        // Reset countdown, rotation, and spinEnded after 5 seconds
+        setSeconds(initialSeconds);
+        setSpinEnded(false); // Reset spin ended status
+      }, 5000);
+      return () => clearTimeout(resetTimer);
+    }
+  }, [spinEnded]);
+
+  const formatTime = (secs: number): string => {
+    const minutes = Math.floor(secs / 60);
+    const remainingSeconds = secs % 60;
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  };
+
+
+
+
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
@@ -115,6 +166,7 @@ const CheckList = ({}: any) => {
           <History className="size-6" />
           <h4 className="text-md font-bold">History</h4>
         </div>
+        <h2 className="text-md font-bold px-4 py-1 rounded-3xl text-[#ab9ff2] border-[#ab9ff2] border-[2px] bg-transparent">{formatTime(seconds)}</h2>
         {/* <Clock
           format={"HH:mm"}
           ticking={true}
@@ -158,11 +210,11 @@ const CheckList = ({}: any) => {
           type="number"
           value={solAmount}
           onChange={handleSetAmount}
-          className="mx-auto w-[340px] rounded-md bg-transparent py-3 outline"
+          className="mx-auto w-[340px] rounded-md bg-transparent p-3 outline-none border-white border-[4px] font-bold"
         />
         <button
           onClick={sendSol}
-          className="mt-4 w-full rounded-lg bg-yellow-400 p-3 font-bold text-black"
+          className="mt-4 w-full rounded-lg bg-[#ab9ff2] p-3 font-bold text-[#1C1C1C] hover:bg-[#5842c3] ease-linear duration-200 hover:text-white"
         >
           SUBMIT
         </button>
