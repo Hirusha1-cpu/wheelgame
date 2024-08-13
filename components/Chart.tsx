@@ -10,7 +10,7 @@ ChartTS.register(ArcElement, Tooltip); // Register Tooltip
 const Chart = () => {
   let solAmount = Number(useAppSelector(selectSolAmount));
   const chartData = useAppSelector(selectChartData);
-  const initialSeconds = 10;
+  const initialSeconds = 5 * 60;
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(initialSeconds);
@@ -32,6 +32,25 @@ const Chart = () => {
   }, [seconds]);
 
   useEffect(() => {
+    // Calculate the winning color and update the border color
+    function calculateWinnerColor() {
+      const data = chartData.datasets[0].data;
+      const colors = chartData.datasets[0].backgroundColor;
+      let cumulativeAngle = 0;
+      const stopAngle = stopPosition;
+
+      for (let i = 0; i < data.length; i++) {
+        const segmentAngle =
+          (data[i] / data.reduce((a: any, b: any) => a + b, 0)) * 360;
+        cumulativeAngle += segmentAngle;
+
+        if (stopAngle <= cumulativeAngle) {
+          setBorderColor(colors[i]);
+          break;
+        }
+      }
+    }
+
     if (chartAnimate) {
       const timer = setTimeout(() => {
         setChartAnimate(false);
@@ -40,7 +59,7 @@ const Chart = () => {
       }, 5000); // Spin duration
       return () => clearTimeout(timer);
     }
-  }, [chartAnimate]);
+  }, [chartAnimate, chartData.datasets, stopPosition]);
 
   useEffect(() => {
     if (spinEnded) {
@@ -63,26 +82,8 @@ const Chart = () => {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-  // Calculate the winning color and update the border color
-  const calculateWinnerColor = () => {
-    const data = chartData.datasets[0].data;
-    const colors = chartData.datasets[0].backgroundColor;
-    let cumulativeAngle = 0;
-    const stopAngle = stopPosition;
-
-    for (let i = 0; i < data.length; i++) {
-      const segmentAngle = (data[i] / data.reduce((a, b) => a + b, 0)) * 360;
-      cumulativeAngle += segmentAngle;
-
-      if (stopAngle <= cumulativeAngle) {
-        setBorderColor(colors[i]);
-        break;
-      }
-    }
-  };
-
   // Create custom chart options to handle spinning and stopping, including tooltip configuration
-  const options = {
+  const options: any = {
     maintainAspectRatio: false,
     rotation: -totalRotation, // Ensure clockwise rotation
     animation: {
@@ -103,9 +104,9 @@ const Chart = () => {
     },
   };
 
-  solAmount=0;
-  for(let i=0;(chartData.datasets[0].data).length>i;i++){
-    solAmount=solAmount+chartData.datasets[0].data[i];
+  solAmount = 0;
+  for (let i = 0; chartData.datasets[0].data.length > i; i++) {
+    solAmount = solAmount + chartData.datasets[0].data[i];
   }
 
   return (
@@ -114,14 +115,19 @@ const Chart = () => {
         className="relative rounded-full border-8 p-5"
         style={{ borderColor: borderColor }} // Start with white, change to winner color
       >
-        <h2 className="absolute -top-2 left-1/2 -translate-x-1/2 transform text-white text-xl">
+        <h2 className="absolute -top-2 left-1/2 -translate-x-1/2 transform text-xl text-white">
           &#x25BC;
         </h2>
-        <div className={`h-[400px] w-[400px] z-10 cursor-pointer relative`}>
-          <Doughnut data={chartData} width={400} height={400} options={options} />
+        <div className={`relative z-10 h-[400px] w-[400px] cursor-pointer`}>
+          <Doughnut
+            data={chartData}
+            width={400}
+            height={400}
+            options={options}
+          />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="font-bold text-4xl">{solAmount}SOL</p>
+          <p className="text-4xl font-bold">{solAmount}SOL</p>
         </div>
       </div>
     </div>
