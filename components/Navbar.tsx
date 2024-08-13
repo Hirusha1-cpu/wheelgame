@@ -91,11 +91,13 @@ const NavBar = () => {
   }, []);
 
   return (
-    <div className="w-full bg-blue-500 p-5">
-      <h1 className="text-2xl text-white">NavBar</h1>
-      <button onClick={handleConnect}>Connect to Phantom</button>
-      {wallet && <p>Connected: {wallet}</p>}
-      {error && <p>Error: {error}</p>}
+    <div className="w-full bg-[#1C1C1E] p-5 flex items-center justify-between">
+      <h1 className="text-2xl text-white font-bold">Logo Here</h1>
+      <div className="flex flex-row-reverse items-center gap-4">
+        <button onClick={handleConnect} className="hover:bg-[#5842c3] px-4 py-2 rounded-3xl text-white border-white border-[2px] bg-transparent ease-linear duration-100 hover:scale-105 hover:font-bold">Connect</button>
+        {wallet && <p>Connected: {wallet}</p>}
+        {error && <p>Error: {error}</p>}
+      </div>
     </div>
   );
 };
