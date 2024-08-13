@@ -40,6 +40,12 @@ function Player({ index, chartData }: { index: number; chartData: any }) {
   // Generate a random avatar URL
   const avatarUrl = `https://robohash.org/player${index}?set=set4&size=50x50`;
 
+  // Format the player name (wallet address) to show first 4 digits, three dots, and last 4 digits
+  const formattedLabel =
+    chartData.labels[index].slice(0, 4) +
+    "..." +
+    chartData.labels[index].slice(-4);
+
   return (
     <div
       className="flex items-center justify-between rounded-2xl p-2 px-5 mx-4 gap-3 bg-neutral-700 cursor-pointer hover:scale-105 ease-linear duration-200"
@@ -47,12 +53,12 @@ function Player({ index, chartData }: { index: number; chartData: any }) {
       <Image
         alt="player avatar"
         src={avatarUrl}
-        width={50}
-        height={50}
+        width={30}
+        height={30}
         className="rounded-full"
       />
       <h3 className="font-semibold capitalize mr-auto">
-        {chartData.labels[index]}
+        {formattedLabel}
       </h3>
       <div className="flex flex-col items-end justify-end">
         <h4 className="text-l font-bold">{playerPercentage}%</h4>
@@ -62,7 +68,6 @@ function Player({ index, chartData }: { index: number; chartData: any }) {
         </h4>
       </div>
       <div className="h-[15px] w-[15px] rounded-full" style={{ backgroundColor: chartData.datasets[0].backgroundColor[index]}}></div>
-
     </div>
   );
 }
