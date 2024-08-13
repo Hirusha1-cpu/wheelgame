@@ -42,7 +42,7 @@ const Chart = () => {
       }, 5000); // Spin duration
       return () => clearTimeout(timer);
     }
-  }, [chartAnimate, chartData.datasets, stopPosition]);
+  }, [chartAnimate]);
 
   useEffect(() => {
     if (spinEnded) {
@@ -77,11 +77,8 @@ const Chart = () => {
     }
   };
 
-  const formatTime = (secs: number): string => {
-    const minutes = Math.floor(secs / 60);
-    const remainingSeconds = secs % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-  };
+  // Calculate total SOL amount
+  solAmount = chartData.datasets[0].data.reduce((acc: number, value: number) => acc + value, 0);
 
   // Create custom chart options to handle spinning and stopping, including tooltip configuration
   const options: any = {
@@ -110,10 +107,7 @@ const Chart = () => {
       },
     },
   };
-  solAmount = 0;
-  for (let i = 0; chartData.datasets[0].data.length > i; i++) {
-    solAmount = solAmount + chartData.datasets[0].data[i];
-  }
+
   return (
     <div className="flex h-full w-full items-start mt-10 justify-center">
       <div
