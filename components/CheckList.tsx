@@ -162,8 +162,8 @@ const CheckList = ({}: any) => {
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <History className="size-6" />
+        <div className="flex items-center gap-1 rounded-3xl px-3 py-2">
+          <History className="size-5" />
           <h4 className="text-md font-bold">History</h4>
         </div>
         <h2 className="text-md font-bold px-4 py-1 rounded-3xl text-[#ab9ff2] border-[#ab9ff2] border-[2px] bg-transparent">{formatTime(seconds)}</h2>
