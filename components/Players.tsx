@@ -42,7 +42,7 @@ function Player({ index, chartData }: { index: number; chartData: any }) {
 
   return (
     <div
-      className="flex items-center justify-between rounded-2xl p-2 px-5 mx-4 gap-3 bg-neutral-700"
+      className="flex items-center justify-between rounded-2xl p-2 px-5 mx-4 gap-3 bg-neutral-700 cursor-pointer hover:scale-105 ease-linear duration-200"
     >
       <Image
         alt="player avatar"
