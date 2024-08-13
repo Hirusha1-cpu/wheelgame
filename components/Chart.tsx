@@ -8,8 +8,8 @@ import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement, Tooltip); // Register Tooltip
 
 const Chart = () => {
-  let solAmount = Number(useAppSelector(selectSolAmount));
   const chartData = useAppSelector(selectChartData);
+  let solAmount = Number(useAppSelector(selectSolAmount));
   const initialSeconds = 5 * 60;
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
@@ -20,37 +20,20 @@ const Chart = () => {
   const [spinEnded, setSpinEnded] = useState<boolean>(false); // Track if spin has ended
 
   useEffect(() => {
-    if (seconds > 0) {
-      const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      const randomStop = Math.floor(Math.random() * 360); // Random stop position
-      setStopPosition(randomStop);
-      setChartAnimate(true);
-      setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
-    }
-  }, [seconds]);
-
-  useEffect(() => {
-    // Calculate the winning color and update the border color
-    function calculateWinnerColor() {
-      const data = chartData.datasets[0].data;
-      const colors = chartData.datasets[0].backgroundColor;
-      let cumulativeAngle = 0;
-      const stopAngle = stopPosition;
-
-      for (let i = 0; i < data.length; i++) {
-        const segmentAngle =
-          (data[i] / data.reduce((a: any, b: any) => a + b, 0)) * 360;
-        cumulativeAngle += segmentAngle;
-
-        if (stopAngle <= cumulativeAngle) {
-          setBorderColor(colors[i]);
-          break;
-        }
+    if (chartData.status === "closed") {
+      if (seconds > 0) {
+        const timer = setTimeout(() => setSeconds(seconds - 1), 1000);
+        return () => clearTimeout(timer);
+      } else {
+        const randomStop = Math.floor(Math.random() * 360); // Random stop position
+        setStopPosition(randomStop);
+        setChartAnimate(true);
+        setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
       }
     }
+  }, [seconds, chartData.status]);
 
+  useEffect(() => {
     if (chartAnimate) {
       const timer = setTimeout(() => {
         setChartAnimate(false);
@@ -76,6 +59,24 @@ const Chart = () => {
     }
   }, [spinEnded]);
 
+  const calculateWinnerColor = () => {
+    const data = chartData.datasets[0].data;
+    const colors = chartData.datasets[0].backgroundColor;
+    let cumulativeAngle = 0;
+    const stopAngle = stopPosition;
+
+    for (let i = 0; i < data.length; i++) {
+      const segmentAngle =
+        (data[i] / data.reduce((a: any, b: any) => a + b, 0)) * 360;
+      cumulativeAngle += segmentAngle;
+
+      if (stopAngle <= cumulativeAngle) {
+        setBorderColor(colors[i]);
+        break;
+      }
+    }
+  };
+
   const formatTime = (secs: number): string => {
     const minutes = Math.floor(secs / 60);
     const remainingSeconds = secs % 60;
@@ -95,22 +96,26 @@ const Chart = () => {
         enabled: true, // Enable tooltip
         callbacks: {
           label: (tooltipItem: any) => {
-            const label = tooltipItem.label || "";
+            const index = tooltipItem.dataIndex;
+            const formattedLabel =
+              chartData.labels[index].slice(0, 4) +
+              "..." +
+              chartData.labels[index].slice(-4); // Format label
             const value = tooltipItem.raw;
-            return `${label}: ${value}`;
+            return `${formattedLabel}: ${value}`; // Only show formatted label and value
           },
+          title: () => '', // Optionally hide the title
+          afterLabel: () => '', // Optionally hide additional information
         },
       },
     },
   };
-
   solAmount = 0;
   for (let i = 0; chartData.datasets[0].data.length > i; i++) {
     solAmount = solAmount + chartData.datasets[0].data[i];
   }
-
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex h-full w-full items-start mt-10 justify-center">
       <div
         className="relative rounded-full border-8 p-5"
         style={{ borderColor: borderColor }} // Start with white, change to winner color
@@ -127,7 +132,7 @@ const Chart = () => {
           />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-4xl font-bold">{solAmount}SOL</p>
+          <p className="text-4xl font-bold text-white">{solAmount} SOL</p>
         </div>
       </div>
     </div>
