@@ -4,6 +4,7 @@ import Chartcomponents from "@/components/ChartComponents";
 import CheckList from "@/components/CheckList";
 import Players from "@/components/Players";
 import {
+  selectStopRequest,
   selectWallet,
   selectStatus,
   setChartData,
@@ -14,6 +15,7 @@ import {
   setWinChance,
   setYourEntries,
   setWinner,
+  setStopRequest, // Add this import
 } from "@/lib/features/mainSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useEffect } from "react";
@@ -22,10 +24,10 @@ export default function Home() {
   const dispatch = useAppDispatch();
   const wallet = useAppSelector(selectWallet);
   const status = useAppSelector(selectStatus);
-  
+  let stopRequest = useAppSelector(selectStopRequest);
 
   useEffect(() => {
-    if (wallet === undefined || status === 'closed') return;
+    if (wallet === undefined || stopRequest) return;
 
     const intervalId = setInterval(() => {
       fetch(`/api/roundData?me=${wallet}`).then((res) => {
@@ -43,7 +45,13 @@ export default function Home() {
     }, 2000);
 
     return () => clearInterval(intervalId); // Cleanup the interval on component unmount
-  }, [dispatch, wallet, status]);
+  }, [dispatch, wallet, status, stopRequest]);
+
+  useEffect(() => {
+    if (status === "closed") {
+      dispatch(setStopRequest(true)); // Set stopRequest to true when the spin starts
+    }
+  }, [status, dispatch]);
 
   return (
     <div className="custom-height mx-auto max-w-[90rem]">
@@ -61,5 +69,3 @@ export default function Home() {
     </div>
   );
 }
-
-// rounded-[20px] border bg-black

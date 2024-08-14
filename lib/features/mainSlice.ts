@@ -12,6 +12,7 @@ export interface MainSliceState {
   yourEntries: number;
   status: string | undefined;
   winner: string | undefined;
+  stopRequest:boolean | undefined;
   error: string | undefined;
 }
 
@@ -36,6 +37,7 @@ const initialState: MainSliceState = {
   yourEntries: 0,
   status:undefined,
   winner:undefined,
+  stopRequest:undefined,
   error: undefined,
 };
 
@@ -79,6 +81,9 @@ export const mainSlice = createAppSlice({
     setWinner: create.reducer((state, action: PayloadAction<string>) => {
       state.winner = action.payload;
     }),
+    setStopRequest: create.reducer((state, action: PayloadAction<boolean>) => {
+      state.stopRequest = action.payload;
+    }),
     setError: create.reducer((state, action: PayloadAction<string>) => {
       state.error = action.payload;
     }),
@@ -97,6 +102,7 @@ export const mainSlice = createAppSlice({
     selectYourEntries: (counter) => counter.yourEntries,
     selectStatus: (counter) => counter.status,
     selectWinner: (counter) => counter.winner,
+    selectStopRequest: (counter) => counter.stopRequest,
   },
 });
 
@@ -112,6 +118,7 @@ export const {
   setYourEntries,
   setStatus,
   setWinner,
+  setStopRequest,
   setError,
 } = mainSlice.actions;
 
@@ -127,5 +134,6 @@ export const {
   selectYourEntries,
   selectStatus,
   selectWinner,
+  selectStopRequest,
   selectError,
 } = mainSlice.selectors;
