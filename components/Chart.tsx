@@ -17,13 +17,16 @@ const Chart = () => {
   const [borderColor, setBorderColor] = useState<string>("white");
   const [spinEnded, setSpinEnded] = useState<boolean>(false);
 
-  // Trigger wheel spin when status is 'closed'
+  // Trigger wheel spin when status is 'closed', with a 10-second delay
   useEffect(() => {
     if (chartData.status === "closed") {
-      const randomStop = Math.floor(Math.random() * 360); // Random stop position
-      setStopPosition(randomStop);
-      setChartAnimate(true);
-      setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
+      const delayTimer = setTimeout(() => {
+        const randomStop = Math.floor(Math.random() * 360); // Random stop position
+        setStopPosition(randomStop);
+        setChartAnimate(true);
+        setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
+      }, 10000); // 10-second delay before starting the spin
+      return () => clearTimeout(delayTimer);
     }
   }, [chartData.status]);
 
