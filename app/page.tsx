@@ -9,6 +9,7 @@ import {
   setNumberOfPlayers,
   setPricePool,
   setRoundNumber,
+  setStatus,
   setWinChance,
   setYourEntries,
 } from "@/lib/features/mainSlice";
@@ -31,6 +32,7 @@ export default function Home() {
         dispatch(setPricePool(data?.pricePool));
         dispatch(setWinChance(data?.winChance));
         dispatch(setYourEntries(data?.yourEntries));
+        dispatch(setStatus(data?.status));
       });
     });
   }, 2000);
