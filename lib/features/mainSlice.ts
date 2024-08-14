@@ -11,6 +11,7 @@ export interface MainSliceState {
   winChance: number;
   yourEntries: number;
   status: string | undefined;
+  winner: string | undefined;
   error: string | undefined;
 }
 
@@ -34,6 +35,7 @@ const initialState: MainSliceState = {
   winChance: 0,
   yourEntries: 0,
   status:undefined,
+  winner:undefined,
   error: undefined,
 };
 
@@ -74,6 +76,9 @@ export const mainSlice = createAppSlice({
     setStatus: create.reducer((state, action: PayloadAction<string>) => {
       state.status = action.payload;
     }),
+    setWinner: create.reducer((state, action: PayloadAction<string>) => {
+      state.winner = action.payload;
+    }),
     setError: create.reducer((state, action: PayloadAction<string>) => {
       state.error = action.payload;
     }),
@@ -91,6 +96,7 @@ export const mainSlice = createAppSlice({
     selectWinChance: (counter) => counter.winChance,
     selectYourEntries: (counter) => counter.yourEntries,
     selectStatus: (counter) => counter.status,
+    selectWinner: (counter) => counter.winner,
   },
 });
 
@@ -105,6 +111,7 @@ export const {
   setWinChance,
   setYourEntries,
   setStatus,
+  setWinner,
   setError,
 } = mainSlice.actions;
 
@@ -119,5 +126,6 @@ export const {
   selectWinChance,
   selectYourEntries,
   selectStatus,
+  selectWinner,
   selectError,
 } = mainSlice.selectors;
