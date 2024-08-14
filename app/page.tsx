@@ -15,7 +15,7 @@ import {
   setWinChance,
   setYourEntries,
   setWinner,
-  setStopRequest, // Add this import
+  setStopRequest,
 } from "@/lib/features/mainSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useEffect } from "react";
@@ -44,12 +44,12 @@ export default function Home() {
       });
     }, 2000);
 
-    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+    return () => clearInterval(intervalId); 
   }, [dispatch, wallet, status, stopRequest]);
 
   useEffect(() => {
     if (status === "closed") {
-      dispatch(setStopRequest(true)); // Set stopRequest to true when the spin starts
+      dispatch(setStopRequest(true)); 
     }
   }, [status, dispatch]);
 
