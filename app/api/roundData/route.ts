@@ -1,7 +1,7 @@
 import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
-const duration = 5 * 60 * 1000; // 5mins
+const duration = 0.5 * 60 * 1000; // 5mins
 
 interface Player {
   address: string;

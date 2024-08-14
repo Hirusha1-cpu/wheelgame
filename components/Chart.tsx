@@ -10,7 +10,7 @@ ChartTS.register(ArcElement, Tooltip); // Register Tooltip
 const Chart = () => {
   const chartData = useAppSelector(selectChartData);
   let solAmount = Number(useAppSelector(selectSolAmount));
-  const initialSeconds = 5 * 60;
+  const initialSeconds = 0.5 * 60;
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
   const [seconds, setSeconds] = useState<number>(initialSeconds);
@@ -78,7 +78,10 @@ const Chart = () => {
   };
 
   // Calculate total SOL amount
-  solAmount = chartData.datasets[0].data.reduce((acc: number, value: number) => acc + value, 0);
+  solAmount = chartData.datasets[0].data.reduce(
+    (acc: number, value: number) => acc + value,
+    0,
+  );
 
   // Create custom chart options to handle spinning and stopping, including tooltip configuration
   const options: any = {
@@ -101,15 +104,15 @@ const Chart = () => {
             const value = tooltipItem.raw;
             return `${formattedLabel}: ${value}`; // Only show formatted label and value
           },
-          title: () => '', // Optionally hide the title
-          afterLabel: () => '', // Optionally hide additional information
+          title: () => "", // Optionally hide the title
+          afterLabel: () => "", // Optionally hide additional information
         },
       },
     },
   };
 
   return (
-    <div className="flex h-full w-full items-start mt-10 justify-center">
+    <div className="mt-10 flex h-full w-full items-start justify-center">
       <div
         className="relative rounded-full border-8 p-5"
         style={{ borderColor: borderColor }} // Start with white, change to winner color

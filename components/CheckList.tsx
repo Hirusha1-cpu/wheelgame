@@ -18,8 +18,23 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
-import React, { ChangeEvent, useCallback, useState, useEffect } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 
+interface Window {
+  open(arg0: string, arg1: string): unknown;
+  phantom?: {
+    solana?: {
+      isPhantom?: boolean;
+      connect(): Promise<{ publicKey: PublicKey }>;
+      disconnect(): Promise<void>;
+      signTransaction(transaction: Transaction): Promise<Transaction>;
+      on(event: string, callback: (arg: any) => void): void;
+      off(event: string, callback: (arg: any) => void): void;
+    };
+  };
+}
+
+declare const window: Window;
 const CheckList = () => {
   const solAmount = useAppSelector(selectSolAmount);
   const pricePool = useAppSelector(selectPricePool);
@@ -50,13 +65,13 @@ const CheckList = () => {
         "8uGGDM6BLU4rhEtK3tCsiAQRc4fWE2CuDopygxDFx9ch",
       );
 
-      const lamportsI = LAMPORTS_PER_SOL * Number(solAmount);
+      const lamports = LAMPORTS_PER_SOL * Number(solAmount);
 
       const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey,
           toPubkey,
-          lamportsI,
+          lamports,
         }),
       );
 
@@ -89,7 +104,7 @@ const CheckList = () => {
     }
   }, [wallet, solAmount, dispatch]);
 
-  const initialSeconds = 5 * 60;
+  const initialSeconds = 0.5 * 60;
   const [seconds, setSeconds] = useState<number>(initialSeconds);
   const [resetTimer, setResetTimer] = useState<boolean>(false);
 
@@ -104,12 +119,12 @@ const CheckList = () => {
         setSeconds(initialSeconds);
         setResetTimer(false);
       }, 10000);
-      
+
       return () => clearTimeout(resetTimeout);
     }
 
     return () => clearTimeout(timer);
-  }, [seconds, resetTimer]);
+  }, [seconds, resetTimer, initialSeconds]);
 
   useEffect(() => {
     if (seconds === 0) {
@@ -126,7 +141,9 @@ const CheckList = () => {
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-md font-bold px-4 py-1 rounded-3xl text-[#ab9ff2] border-[#ab9ff2] border-[2px] bg-transparent ml-auto">{formatTime(seconds)}</h2>
+        <h2 className="text-md ml-auto rounded-3xl border-[2px] border-[#ab9ff2] bg-transparent px-4 py-1 font-bold text-[#ab9ff2]">
+          {formatTime(seconds)}
+        </h2>
       </div>
       <div className="mt-6 h-[215px] w-full rounded-lg bg-neutral-700 p-5">
         <div className="rounded-xl bg-[#1C1C1E] p-4">
@@ -160,7 +177,9 @@ const CheckList = () => {
 
       <div
         className={`mx-auto mt-6 h-[200px] w-full rounded-lg px-3 ${
-          seconds <= 30 ? "bg-neutral-600 opacity-50 pointer-events-none" : "bg-neutral-700"
+          seconds <= 30
+            ? "pointer-events-none bg-neutral-600 opacity-50"
+            : "bg-neutral-700"
         }`}
       >
         <h2 className="p-3 text-2xl font-bold">DEPOSIT</h2>
@@ -168,12 +187,12 @@ const CheckList = () => {
           type="number"
           value={solAmount}
           onChange={handleSetAmount}
-          className="mx-auto w-[340px] rounded-md bg-transparent py-3 px-5 outline-none border-white border-[4px] font-bold text-xl"
+          className="mx-auto w-[340px] rounded-md border-[4px] border-white bg-transparent px-5 py-3 text-xl font-bold outline-none"
           disabled={seconds <= 30}
         />
         <button
           onClick={sendSol}
-          className="mt-4 w-full rounded-lg bg-[#ab9ff2] p-3 font-bold text-[#1C1C1C] hover:bg-[#5842c3] ease-linear duration-200 hover:text-white"
+          className="mt-4 w-full rounded-lg bg-[#ab9ff2] p-3 font-bold text-[#1C1C1C] duration-200 ease-linear hover:bg-[#5842c3] hover:text-white"
           disabled={seconds <= 30}
         >
           SUBMIT
