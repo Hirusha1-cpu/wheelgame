@@ -5,6 +5,7 @@ import CheckList from "@/components/CheckList";
 import Players from "@/components/Players";
 import {
   selectWallet,
+  selectStatus,
   setChartData,
   setNumberOfPlayers,
   setPricePool,
@@ -12,30 +13,37 @@ import {
   setStatus,
   setWinChance,
   setYourEntries,
+  setWinner,
 } from "@/lib/features/mainSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function Home() {
   const dispatch = useAppDispatch();
   const wallet = useAppSelector(selectWallet);
+  const status = useAppSelector(selectStatus);
+  
 
-  useEffect(() => {}, [dispatch, wallet]);
+  useEffect(() => {
+    if (wallet === undefined || status === 'closed') return;
 
-  setInterval(() => {
-    if (wallet === undefined) return;
-    fetch(`/api/roundData?me=${wallet}`).then((res) => {
-      res.json().then((data) => {
-        dispatch(setChartData(data?.chartData));
-        dispatch(setRoundNumber(data?.roundNumber));
-        dispatch(setNumberOfPlayers(data?.numberOfPlayers));
-        dispatch(setPricePool(data?.pricePool));
-        dispatch(setWinChance(data?.winChance));
-        dispatch(setYourEntries(data?.yourEntries));
-        dispatch(setStatus(data?.status));
+    const intervalId = setInterval(() => {
+      fetch(`/api/roundData?me=${wallet}`).then((res) => {
+        res.json().then((data) => {
+          dispatch(setChartData(data?.chartData));
+          dispatch(setRoundNumber(data?.roundNumber));
+          dispatch(setNumberOfPlayers(data?.numberOfPlayers));
+          dispatch(setPricePool(data?.pricePool));
+          dispatch(setWinChance(data?.winChance));
+          dispatch(setYourEntries(data?.yourEntries));
+          dispatch(setStatus(data?.status));
+          dispatch(setWinner(data?.winner));
+        });
       });
-    });
-  }, 2000);
+    }, 2000);
+
+    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+  }, [dispatch, wallet, status]);
 
   return (
     <div className="custom-height mx-auto max-w-[90rem]">

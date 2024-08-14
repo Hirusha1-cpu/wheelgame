@@ -1,6 +1,6 @@
 "use client";
 
-import { selectChartData, selectSolAmount } from "@/lib/features/mainSlice";
+import { selectChartData, selectSolAmount, selectStatus, selectWinner } from "@/lib/features/mainSlice";
 import { useAppSelector } from "@/lib/hooks";
 import { ArcElement, Chart as ChartTS, Tooltip } from "chart.js";
 import React, { useEffect, useState } from "react";
@@ -9,6 +9,8 @@ ChartTS.register(ArcElement, Tooltip);
 
 const Chart = () => {
   const chartData = useAppSelector(selectChartData);
+  const status = useAppSelector(selectStatus);
+  const winner = useAppSelector(selectWinner);
   let solAmount = Number(useAppSelector(selectSolAmount));
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
@@ -19,16 +21,34 @@ const Chart = () => {
 
   // Trigger wheel spin when status is 'closed', with a 10-second delay
   useEffect(() => {
-    if (chartData.status === "closed") {
+    if (status === "closed") {
+      console.log(winner);
       const delayTimer = setTimeout(() => {
-        const randomStop = Math.floor(Math.random() * 360); // Random stop position
-        setStopPosition(randomStop);
+        const winnerIndex = chartData.labels.indexOf(winner); // Find the index of the winner
+        const data = chartData.datasets[0].data;
+        const totalAmount = data.reduce((acc: number, value: number) => acc + value, 0);
+
+        let cumulativeAngle = 0;
+        let winnerStopPosition = 0;
+
+        // Calculate the stop position that aligns with the winner
+        for (let i = 0; i < data.length; i++) {
+          const segmentAngle = (data[i] / totalAmount) * 360;
+          cumulativeAngle += segmentAngle;
+
+          if (i === winnerIndex) {
+            winnerStopPosition = cumulativeAngle - segmentAngle / 2; // Stop in the middle of the segment
+            break;
+          }
+        }
+
+        setStopPosition(winnerStopPosition);
         setChartAnimate(true);
-        setTotalRotation((prev) => prev + 360 * 50 + randomStop); // Spin 50 full rotations + random stop
+        setTotalRotation((prev) => prev + 360 * 50 + winnerStopPosition); // Spin 50 full rotations + winner stop
       }, 10000); // 10-second delay before starting the spin
       return () => clearTimeout(delayTimer);
     }
-  }, [chartData.status]);
+  }, [status]);
 
   // Stop the spin and calculate the winner color
   useEffect(() => {
@@ -65,8 +85,7 @@ const Chart = () => {
     const stopAngle = stopPosition;
 
     for (let i = 0; i < data.length; i++) {
-      const segmentAngle =
-        (data[i] / data.reduce((a: any, b: any) => a + b, 0)) * 360;
+      const segmentAngle = (data[i] / data.reduce((a: any, b: any) => a + b, 0)) * 360;
       cumulativeAngle += segmentAngle;
 
       if (stopAngle <= cumulativeAngle) {
@@ -79,7 +98,7 @@ const Chart = () => {
   // Calculate total SOL amount
   solAmount = chartData.datasets[0].data.reduce(
     (acc: number, value: number) => acc + value,
-    0,
+    0
   );
 
   // Chart options
