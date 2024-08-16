@@ -54,6 +54,17 @@ const CheckList = () => {
       return;
     }
 
+    await fetch("api/playerData", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        address: wallet,
+        amount: Number(solAmount),
+      }),
+    });
+
     const connection = new Connection(
       "https://bold-cold-slug.solana-mainnet.quiknode.pro/54db75007763785718be9e42395c759dfdd3cd39/",
       "confirmed",
@@ -176,11 +187,7 @@ const CheckList = () => {
       </div>
 
       <div
-        className={`mx-auto mt-6 h-[200px] w-full rounded-lg px-3 ${
-          seconds <= 30
-            ? "pointer-events-none bg-neutral-600 opacity-50"
-            : "bg-neutral-700"
-        }`}
+        className={`"bg-neutral-700" mx-auto mt-6 h-[200px] w-full rounded-lg px-3`}
       >
         <h2 className="p-3 text-2xl font-bold">DEPOSIT</h2>
         <input
@@ -188,12 +195,10 @@ const CheckList = () => {
           value={solAmount}
           onChange={handleSetAmount}
           className="mx-auto w-[340px] rounded-md border-[4px] border-white bg-transparent px-5 py-3 text-xl font-bold outline-none"
-          disabled={seconds <= 30}
         />
         <button
           onClick={sendSol}
           className="mt-4 w-full rounded-lg bg-[#ab9ff2] p-3 font-bold text-[#1C1C1C] duration-200 ease-linear hover:bg-[#5842c3] hover:text-white"
-          disabled={seconds <= 30}
         >
           SUBMIT
         </button>

@@ -1,3 +1,6 @@
+import dbConnect from "@/lib/db";
+import RoundData from "@/models/RoudData";
+import Round from "@/models/Round";
 import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
@@ -39,82 +42,85 @@ const distinctColors: string[] = [
 
 let winner: string | null = null;
 
-const dbData: {
-  [key: number]: { players: Player[]; startTimeStamp: number };
-  currentRound: number;
-} = {
-  0: {
-    players: [
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-      { address: "address2", entries: 3 },
-      { address: "address2", entries: 3 },
-      { address: "address2", entries: 3 },
-      { address: "address2", entries: 3 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 1 },
-      { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 1 },
-      { address: "address3", entries: 1 },
-      { address: "address4", entries: 1 },
-      { address: "address4", entries: 1 },
-    ],
-    startTimeStamp: 0,
-  },
-  currentRound: 0,
-};
+async function getCurrentRound() {
+  await dbConnect();
+  const roundData = await RoundData.find();
+  return roundData?.[0]?.currentRoundNumber.toString();
+}
 
-function getCurrentRound(dbData: any) {
-  return dbData.currentRound;
+function isRoundExpired(startTimestamp: number, durationMs: number): boolean {
+  const startTimeMs = startTimestamp;
+  const endTimeMs = startTimeMs + durationMs;
+  return endTimeMs < Date.now();
 }
 
 export async function GET(req: NextApiRequest) {
+  await dbConnect();
   const { searchParams } = new URL(req.url!);
   const currentUserAddress = searchParams.get("me");
 
-  const strtTimestamp = dbData[getCurrentRound(dbData)].startTimeStamp;
+  let currentRound = await getCurrentRound();
 
-  let playerEntries: PlayerEntries = dbData[
-    getCurrentRound(dbData)
-  ].players.reduce((acc, player) => {
-    acc[player.address] = (acc[player.address] || 0) + player.entries;
-    return acc;
-  }, {} as PlayerEntries);
+  let dbData: any = (
+    await Round.find({
+      roundNumber: currentRound,
+    })
+  ).map((a) => a.toObject())[0];
+
+  console.log({ currentRound, currentUserAddress, dbData });
+
+  const strtTimestamp = dbData?.startTimeStamp;
+
+  console.log({ strtTimestamp });
+
+  let playerEntries: PlayerEntries = dbData.players.reduce(
+    (
+      acc: { [x: string]: any },
+      player: { address: string | number; entries: any },
+    ) => {
+      acc[player.address] = (acc[player.address] || 0) + player.entries;
+      return acc;
+    },
+    {} as PlayerEntries,
+  );
 
   let pricePool: number = Object.values(playerEntries).reduce(
     (sum, entries) => sum + entries,
     0,
   );
 
-  if (status === "open" && strtTimestamp + duration < Date.now()) {
+  if (status === "open" && isRoundExpired(strtTimestamp, duration)) {
     status = "closed";
     winner =
       Object.keys(playerEntries)[
-        Math.floor(Math.random() * Object.keys(dbData).length)
+        Math.floor(Math.random() * Object.keys(playerEntries).length)
       ];
   } else if (status === "closed") {
     status = "open";
     winner = null;
-    const currentRound = dbData.currentRound + 1;
-    dbData[currentRound] = {
-      players: [
-        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-        { address: "FgzKsFz4J4mP7GMRwigjL7n5M7zBwaSD2fdhAeYd6NV5", entries: 2 },
-        { address: "address2", entries: 3 },
-        { address: "address3", entries: 3 },
-        { address: "address2", entries: 3 },
-      ],
+    const newRound = (Number(currentRound) + 1).toString();
+
+    await RoundData.updateOne({ key: "0" }, { currentRoundNumber: newRound });
+    await Round.create({
+      roundNumber: newRound,
+      players: [],
       startTimeStamp: Date.now(),
-    };
-    dbData.currentRound = currentRound;
-    dbData[currentRound].startTimeStamp = Date.now();
+    });
   }
 
-  playerEntries = dbData[getCurrentRound(dbData)].players.reduce(
-    (acc, player) => {
+  currentRound = await getCurrentRound();
+
+  dbData = (
+    await Round.find({
+      roundNumber: currentRound,
+    })
+  ).map((a) => a.toObject())[0];
+
+  playerEntries = dbData.players.reduce(
+    (
+      acc: { [x: string]: any },
+      player: { address: string | number; entries: any },
+    ) => {
       acc[player.address] = (acc[player.address] || 0) + player.entries;
       return acc;
     },
@@ -130,7 +136,7 @@ export async function GET(req: NextApiRequest) {
 
   return NextResponse.json(
     {
-      roundNumber: getCurrentRound(dbData),
+      roundNumber: currentRound,
       pricePool: pricePool,
       numberOfPlayers: Object.keys(playerEntries).length,
       yourEntries,
