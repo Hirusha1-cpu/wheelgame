@@ -42,7 +42,7 @@ const distinctColors: string[] = [
 
 let winner: string | null = null;
 
-async function getCurrentRound() {
+export async function getCurrentRound() {
   await dbConnect();
   const roundData = await RoundData.find();
   return roundData?.[0]?.currentRoundNumber.toString();

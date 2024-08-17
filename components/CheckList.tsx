@@ -1,5 +1,6 @@
 "use client";
 
+import { tokenAddress } from "@/consts";
 import {
   selectNumberOfPlayers,
   selectPricePool,
@@ -11,6 +12,12 @@ import {
   setSolAmount,
 } from "@/lib/features/mainSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  TOKEN_PROGRAM_ID,
+  createTransferInstruction,
+  getAssociatedTokenAddress,
+  getOrCreateAssociatedTokenAccount,
+} from "@solana/spl-token";
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -48,13 +55,13 @@ const CheckList = () => {
     dispatch(setSolAmount(event.target.value));
   };
 
-  const sendSol = useCallback(async (): Promise<void> => {
+  const sendToken = useCallback(async (): Promise<void> => {
     if (!wallet) {
       dispatch(setError("Wallet not connected"));
       return;
     }
 
-    await fetch("api/playerData", {
+    fetch("api/playerData", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -73,17 +80,30 @@ const CheckList = () => {
     try {
       const fromPubkey = new PublicKey(wallet);
       const toPubkey = new PublicKey(
-        "8uGGDM6BLU4rhEtK3tCsiAQRc4fWE2CuDopygxDFx9ch",
+        "911Dex4Wfy2UtRFSXDg9RwMSAULd7nLGcFP64C8spTuA",
       );
 
-      const lamports = LAMPORTS_PER_SOL * Number(solAmount);
+      const splTokenMintAddress = new PublicKey(tokenAddress);
+      const tokenAmountBigInt = BigInt(Math.floor(Number(solAmount) * 10 ** 6));
+
+      const senderTokenAccount = await getAssociatedTokenAddress(
+        new PublicKey(tokenAddress),
+        fromPubkey,
+      );
+      const recipientTokenAccount = await getAssociatedTokenAddress(
+        splTokenMintAddress,
+        toPubkey,
+      );
 
       const transaction = new Transaction().add(
-        SystemProgram.transfer({
+        createTransferInstruction(
+          senderTokenAccount,
+          recipientTokenAccount,
           fromPubkey,
-          toPubkey,
-          lamports,
-        }),
+          tokenAmountBigInt,
+          [],
+          TOKEN_PROGRAM_ID,
+        ),
       );
 
       const { blockhash, lastValidBlockHeight } =
@@ -197,7 +217,7 @@ const CheckList = () => {
           className="mx-auto w-[340px] rounded-md border-[4px] border-white bg-transparent px-5 py-3 text-xl font-bold outline-none"
         />
         <button
-          onClick={sendSol}
+          onClick={sendToken}
           className="mt-4 w-full rounded-lg bg-[#ab9ff2] p-3 font-bold text-[#1C1C1C] duration-200 ease-linear hover:bg-[#5842c3] hover:text-white"
         >
           SUBMIT
