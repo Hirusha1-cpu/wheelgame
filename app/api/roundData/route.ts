@@ -67,11 +67,8 @@ export async function GET(req: NextApiRequest) {
     })
   ).map((a) => a.toObject())[0];
 
-  console.log({ currentRound, currentUserAddress, dbData });
-
   const strtTimestamp = dbData?.startTimeStamp;
 
-  console.log({ strtTimestamp });
 
   let playerEntries: PlayerEntries = dbData.players.reduce(
     (

@@ -44,21 +44,15 @@ export async function POST(req: Request) {
   const { address, amount } = await req.json();
 
   try {
-    const preTokenBalanace = await getTokenBalance(
-      connection,
-      tokenAddress,
-      address,
-    );
+    const preTokenBalanace =
+      (await getTokenBalance(connection, tokenAddress, address)) || 0;
 
-    await setTimeout(7000);
+    await setTimeout(10000);
 
-    const postTokenBalanace = await getTokenBalance(
-      connection,
-      tokenAddress,
-      address,
-    );
+    const postTokenBalanace =
+      (await getTokenBalance(connection, tokenAddress, address)) || 0;
 
-    const delta = postTokenBalanace - preTokenBalanace;
+    const delta = preTokenBalanace - postTokenBalanace;
 
     let currentRound = await getCurrentRound();
 

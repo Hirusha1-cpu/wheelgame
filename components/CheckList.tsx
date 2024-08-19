@@ -141,21 +141,22 @@ const CheckList = () => {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
+    if (wallet) {
+      if (seconds > 0) {
+        timer = setTimeout(() => setSeconds(seconds - 1), 1000);
+      } else if (resetTimer) {
+        // Reset the timer after 10 seconds
+        const resetTimeout = setTimeout(() => {
+          setSeconds(initialSeconds);
+          setResetTimer(false);
+        }, 10000);
 
-    if (seconds > 0) {
-      timer = setTimeout(() => setSeconds(seconds - 1), 1000);
-    } else if (resetTimer) {
-      // Reset the timer after 10 seconds
-      const resetTimeout = setTimeout(() => {
-        setSeconds(initialSeconds);
-        setResetTimer(false);
-      }, 10000);
-
-      return () => clearTimeout(resetTimeout);
+        return () => clearTimeout(resetTimeout);
+      }
     }
 
     return () => clearTimeout(timer);
-  }, [seconds, resetTimer, initialSeconds]);
+  }, [seconds, resetTimer, initialSeconds, wallet]);
 
   useEffect(() => {
     if (seconds === 0) {
