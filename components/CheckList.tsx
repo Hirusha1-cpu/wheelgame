@@ -103,23 +103,53 @@ const CheckList = () => {
 
       const signed = await window.phantom!.solana!.signTransaction(transaction);
 
-      const signature = await connection.sendRawTransaction(
-        signed.serialize(),
-        {
-          skipPreflight: true,
-        },
-      );
-      await fetch("api/playerData", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          address: wallet,
-          amount: Number(solAmount),
-        }),
-      });
-
+    
+      // await fetch("api/playerData", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     address: wallet,
+      //     amount: Number(solAmount),
+      //   }),
+      // });
+      // const signature = await connection.sendRawTransaction(
+      //   signed.serialize(),
+      //   {
+      //     skipPreflight: true,
+      //   },
+      // );
+      let signature = '';
+      try {
+        // Ensure fetch completes before moving to the next step
+        const fetchResponse = await fetch("api/playerData", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address: wallet,
+            amount: Number(solAmount),
+          }),
+        });
+      
+        if (!fetchResponse.ok) {
+          throw new Error(`Failed to fetch: ${fetchResponse.statusText}`);
+        }
+      
+        // Only proceed to send the transaction after fetch is successful
+        signature = await connection.sendRawTransaction(
+          signed.serialize(),
+          {
+            skipPreflight: true,
+          },
+        );
+      
+        // Handle further steps like confirmation, etc.
+      } catch (error) {
+        console.error("Error in transaction process: ", error);
+      }
 
       fetch("api/nextPlayerData", {
         method: "POST",
