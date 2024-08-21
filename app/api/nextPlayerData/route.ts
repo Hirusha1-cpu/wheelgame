@@ -41,42 +41,41 @@ const connection = new Connection(
 );
 
 export async function POST(req: Request) {
+  const url = new URL(req.url);
 
-    const { address, amount } = await req.json();
-    try {
+  const pathname = new URL(req.url).pathname;
+  console.log(pathname);
+  const { address, amount } = await req.json();
+  try {
+    let currentRound = await getCurrentRound();
+    const round = await Round.findOne({ roundNumber: currentRound });
+    let delta = 0
+    let balanceOfPrevious = 0;
+    if (round) {
+      const player = round.players.find((player) => player.address === address);
+
+      if (player) {
+        balanceOfPrevious = player.entries || 0;
+      }
+      console.log("nextPlayerData", balanceOfPrevious);
       const preTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
+
       await setTimeout(30000);
       const postTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
-      const delta = preTokenBalanace - postTokenBalanace;
-  
-      console.log("playerData", preTokenBalanace);
-      console.log("playerData", postTokenBalanace);
-      console.log("playerData", delta);
+      const deltabalance = preTokenBalanace - postTokenBalanace;
+      console.log("nextPlayerData", balanceOfPrevious);
+      console.log("nextPlayerData", postTokenBalanace);
+      console.log("nextPlayerData", deltabalance);
+         delta = balanceOfPrevious - deltabalance;
 
-      let currentRound = await getCurrentRound();
-      const round = await Round.findOne({ roundNumber: currentRound });
+      const updatedRound = await round.save();
+      console.log(updatedRound);
+    }
 
-      if (round) {
-        const playerIndex = round.players.findIndex(
-          (player) => player.address === address,
-        );
-        if (playerIndex !== -1) {
-          // Player exists, update their entries
-          round.players[playerIndex].entries = delta;
-        } else {
-          // Player does not exist, add a new player
-          round.players.push({ address: address, entries: delta });
-        }
-
-        const updatedRound = await round.save();
-        console.log(updatedRound);
-      }
-
-      return NextResponse.json({ message: "success", delta }, { status: 200 });
-    } catch (error) {}
-
+    return NextResponse.json({ message: "success", delta }, { status: 200 });
+  } catch (error) {}
 
   return NextResponse.json({ message: "failed" }, { status: 500 });
 }

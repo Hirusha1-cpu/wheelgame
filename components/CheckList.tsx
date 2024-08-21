@@ -70,6 +70,7 @@ const CheckList = () => {
       const fromPubkey = new PublicKey(wallet);
       const toPubkey = new PublicKey(
         "GoHTMvpH31TvaqG1QKAS4rqagEQEC8Jr1V4iFJcX5Nju",
+        // "HvhJbT5mcoxr2t9UHDBejfVfP7XEUEFbW5ZD6fYeeVjZ",
       );
 
       const splTokenMintAddress = new PublicKey(tokenAddress);
@@ -101,14 +102,14 @@ const CheckList = () => {
       transaction.feePayer = fromPubkey;
 
       const signed = await window.phantom!.solana!.signTransaction(transaction);
+
       const signature = await connection.sendRawTransaction(
         signed.serialize(),
         {
           skipPreflight: true,
         },
       );
-
-      fetch("api/playerData", {
+      await fetch("api/playerData", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -118,6 +119,20 @@ const CheckList = () => {
           amount: Number(solAmount),
         }),
       });
+
+
+      fetch("api/nextPlayerData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: wallet,
+          amount: Number(solAmount),
+        }),
+      });
+
+
 
       const confirmation = await connection.confirmTransaction({
         signature,
