@@ -4,7 +4,7 @@ import Round from "@/models/Round";
 import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
-const duration = 0.5 * 60 * 1000; // 5mins
+const duration = 1 * 60 * 1000; // 1mins
 
 interface Player {
   address: string;
@@ -81,18 +81,26 @@ export async function GET(req: NextApiRequest) {
     {} as PlayerEntries,
   );
 
+  console.log("playerEntries",playerEntries);
+  
+
   let pricePool: number = Object.values(playerEntries).reduce(
     (sum, entries) => sum + entries,
     0,
   );
+  console.log("Checking if round is expired:", isRoundExpired(strtTimestamp, duration));
 
   if (status === "open" && isRoundExpired(strtTimestamp, duration)) {
     status = "closed";
-    winner =
-      Object.keys(playerEntries)[
-        Math.floor(Math.random() * Object.keys(playerEntries).length)
-      ];
-  } else if (status === "closed") {
+    // winner =
+    //   Object.keys(playerEntries)[
+    //     Math.floor(Math.random() * Object.keys(playerEntries).length)
+    //   ];
+    winner= Object.keys(playerEntries)[0];
+    console.log("winner",winner);
+      
+  } 
+  else if (status === "closed") {
     status = "open";
     winner = null;
     const newRound = (Number(currentRound) + 1).toString();
@@ -104,6 +112,7 @@ export async function GET(req: NextApiRequest) {
       startTimeStamp: Date.now(),
     });
   }
+  
 
   currentRound = await getCurrentRound();
 
@@ -131,7 +140,7 @@ export async function GET(req: NextApiRequest) {
 
   const yourEntries = playerEntries[currentUserAddress!] || 0;
 
-  return NextResponse.json(
+  let response =  NextResponse.json(
     {
       roundNumber: currentRound,
       pricePool: pricePool,
@@ -157,5 +166,12 @@ export async function GET(req: NextApiRequest) {
       },
     },
     { status: 200 },
-  );
+
+    
+    
+    );
+    // console.log(response);
+    
+    return response;
+    
 }

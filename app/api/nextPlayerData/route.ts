@@ -53,7 +53,8 @@ export async function POST(req: Request) {
     let balanceOfPrevious = 0;
     if (round) {
       const player = round.players.find((player) => player.address === address);
-
+      console.log(player);
+      
       if (player) {
         balanceOfPrevious = player.entries || 0;
       }
@@ -61,14 +62,18 @@ export async function POST(req: Request) {
       const preTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
 
-      await setTimeout(20000);
+      await setTimeout(5000);
       const postTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
       const deltabalance = preTokenBalanace - postTokenBalanace;
       console.log("nextPlayerData", balanceOfPrevious);
       console.log("nextPlayerData", postTokenBalanace);
       console.log("nextPlayerData", deltabalance);
-         delta = balanceOfPrevious - deltabalance;
+      delta =  deltabalance -balanceOfPrevious;
+
+      if (player) {
+        player.entries = delta;
+      }
 
       const updatedRound = await round.save();
       console.log(updatedRound);

@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     try {
       const preTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
-      await setTimeout(20000);
+      await setTimeout(5000);
       const postTokenBalanace =
         (await getTokenBalance(connection, tokenAddress, address)) || 0;
       const delta = preTokenBalanace - postTokenBalanace;
