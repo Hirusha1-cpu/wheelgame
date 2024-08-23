@@ -54,6 +54,10 @@ const CheckList = () => {
   const handleSetAmount = (event: ChangeEvent<HTMLInputElement>) => {
     dispatch(setSolAmount(event.target.value));
   };
+  const initialSeconds = 1.2 * 60;
+  const [seconds, setSeconds] = useState<number>(0);
+  const [resetTimer, setResetTimer] = useState<boolean>(false);
+  const [isTimerStarted, setIsTimerStarted] = useState<boolean>(false); // New state to track if the timer has started
 
   const sendToken = useCallback(async (): Promise<void> => {
     if (!wallet) {
@@ -103,7 +107,6 @@ const CheckList = () => {
 
       const signed = await window.phantom!.solana!.signTransaction(transaction);
 
-    
       // await fetch("api/playerData", {
       //   method: "POST",
       //   headers: {
@@ -120,7 +123,7 @@ const CheckList = () => {
       //     skipPreflight: true,
       //   },
       // );
-      let signature = '';
+      let signature = "";
       try {
         // Ensure fetch completes before moving to the next step
         const fetchResponse = await fetch("api/playerData", {
@@ -133,19 +136,26 @@ const CheckList = () => {
             amount: Number(solAmount),
           }),
         });
-      
+
         if (!fetchResponse.ok) {
           throw new Error(`Failed to fetch: ${fetchResponse.statusText}`);
         }
-      
+
+        console.log(fetchResponse);
+        const responseData = await fetchResponse.json();
+        console.log("Response from server:", responseData);
+        
+        // Start the timer after successful fetch
+        if (!isTimerStarted) {
+          setSeconds(initialSeconds);
+          setIsTimerStarted(true); // Set the flag to true
+        }
+
         // Only proceed to send the transaction after fetch is successful
-        signature = await connection.sendRawTransaction(
-          signed.serialize(),
-          {
-            skipPreflight: true,
-          },
-        );
-      
+        signature = await connection.sendRawTransaction(signed.serialize(), {
+          skipPreflight: true,
+        });
+
         // Handle further steps like confirmation, etc.
       } catch (error) {
         console.error("Error in transaction process: ", error);
@@ -162,8 +172,6 @@ const CheckList = () => {
         }),
       });
 
-
-
       const confirmation = await connection.confirmTransaction({
         signature,
         blockhash,
@@ -178,16 +186,12 @@ const CheckList = () => {
     } catch (err) {
       // dispatch(setError(`Transaction failed: ${(err as Error).message}`));
     }
-  }, [wallet, solAmount, dispatch]);
-
-  const initialSeconds = 5 * 60;
-  const [seconds, setSeconds] = useState<number>(initialSeconds);
-  const [resetTimer, setResetTimer] = useState<boolean>(false);
+  }, [wallet, solAmount, dispatch, isTimerStarted]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (wallet) {
-      if (seconds > 0) {
+      if (seconds > 0 && isTimerStarted) {
         timer = setTimeout(() => setSeconds(seconds - 1), 1000);
       } else if (resetTimer) {
         // Reset the timer after 10 seconds

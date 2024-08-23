@@ -75,6 +75,14 @@ export async function POST(req: Request) {
         player.entries = delta;
       }
 
+      // if (playerIndex !== -1) {
+      //   // Player exists, update their entries
+      //   round.players[playerIndex].entries = delta;
+      // } else {
+      //   // Player does not exist, add a new player
+      //   round.players.push({ address: address, entries: delta });
+      // }
+
       const updatedRound = await round.save();
       console.log(updatedRound);
     }

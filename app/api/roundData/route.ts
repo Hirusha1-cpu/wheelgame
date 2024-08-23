@@ -4,7 +4,7 @@ import Round from "@/models/Round";
 import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
-const duration = 5 * 60 * 1000; // 5mins
+const duration = 2 * 60 * 1000; // 5mins
 
 interface Player {
   address: string;
@@ -51,6 +51,8 @@ export async function getCurrentRound() {
 function isRoundExpired(startTimestamp: number, durationMs: number): boolean {
   const startTimeMs = startTimestamp;
   const endTimeMs = startTimeMs + durationMs;
+  console.log(endTimeMs,startTimeMs,durationMs,Date.now());
+  
   return endTimeMs < Date.now();
 }
 
@@ -92,11 +94,11 @@ export async function GET(req: NextApiRequest) {
 
   if (status === "open" && isRoundExpired(strtTimestamp, duration)) {
     status = "closed";
-    // winner =
-    //   Object.keys(playerEntries)[
-    //     Math.floor(Math.random() * Object.keys(playerEntries).length)
-    //   ];
-    winner= Object.keys(playerEntries)[0];
+    winner =
+      Object.keys(playerEntries)[
+        Math.floor(Math.random() * Object.keys(playerEntries).length)
+      ];
+    // winner= Object.keys(playerEntries)[0];
     console.log("winner",winner);
       
   } 

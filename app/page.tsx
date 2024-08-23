@@ -47,7 +47,7 @@ export default function Home() {
     return () => clearInterval(intervalId); 
   }, [dispatch, wallet, status, stopRequest]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (status === "closed") {
       dispatch(setStopRequest(true)); 
     }
