@@ -176,11 +176,11 @@ const CheckList = () => {
         );
       }
     } catch (err) {
-      dispatch(setError(`Transaction failed: ${(err as Error).message}`));
+      // dispatch(setError(`Transaction failed: ${(err as Error).message}`));
     }
   }, [wallet, solAmount, dispatch]);
 
-  const initialSeconds = 0.5 * 60;
+  const initialSeconds = 5 * 60;
   const [seconds, setSeconds] = useState<number>(initialSeconds);
   const [resetTimer, setResetTimer] = useState<boolean>(false);
 

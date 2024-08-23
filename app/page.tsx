@@ -42,12 +42,10 @@ export default function Home() {
           dispatch(setWinner(data?.winner));
         });
       });
-    }, 2000);
+    }, 5000);
 
     return () => clearInterval(intervalId); 
   }, [dispatch, wallet, status, stopRequest]);
-
-  
 
   useEffect(() => {
     if (status === "closed") {

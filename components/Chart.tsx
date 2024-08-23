@@ -6,6 +6,10 @@ import { ArcElement, Chart as ChartTS, Tooltip } from "chart.js";
 import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 ChartTS.register(ArcElement, Tooltip);
+import Image from "next/image";
+import winerImage from "@/app/images/winner.png";
+import Confetti from "react-confetti";
+import { useRouter } from "next/navigation";
 
 const Chart = () => {
   const dispatch = useAppDispatch();
@@ -14,15 +18,19 @@ const Chart = () => {
   const winner = useAppSelector(selectWinner);
   let stopRequest = useAppSelector(selectStopRequest);
   let solAmount = Number(useAppSelector(selectSolAmount));
+  const router = useRouter();
 
   const [chartAnimate, setChartAnimate] = useState<boolean>(false);
   const [stopPosition, setStopPosition] = useState<number>(0);
   const [totalRotation, setTotalRotation] = useState<number>(0);
   const [borderColor, setBorderColor] = useState<string>("white");
   const [spinEnded, setSpinEnded] = useState<boolean>(false);
+  const [winnerDisplay, setWinnerDisplay] = useState<string>(""); 
+  const [showCelebration, setShowCelebration] = useState<boolean>(false); // New state for celebration
 
   useEffect(() => {
     if (status === "closed") {
+      router.push(`?round=${"start"}`, {scroll: false,});
       const delayTimer = setTimeout(() => {
         const winnerIndex = chartData.labels.indexOf(winner);
         const data = chartData.datasets[0].data;
@@ -44,7 +52,7 @@ const Chart = () => {
         setStopPosition(winnerStopPosition);
         setChartAnimate(true);
         setTotalRotation((prev) => prev + 360 * 50 + winnerStopPosition);
-      }, 10000);
+      }, 1000);
       return () => clearTimeout(delayTimer);
     }
   }, [status]);
@@ -55,6 +63,8 @@ const Chart = () => {
         setChartAnimate(false);
         setSpinEnded(true);
         calculateWinnerColor();
+        setWinnerDisplay(`${winner}`); 
+        setShowCelebration(true); // Show celebration after spin ends
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -62,13 +72,17 @@ const Chart = () => {
 
   useEffect(() => {
     if (spinEnded) {
+      router.push(`?round=${"end"}`, {scroll: false,});
       const resetTimer = setTimeout(() => {
         setChartAnimate(false);
         setStopPosition(0);
         setTotalRotation(0);
         setBorderColor("white");
         setSpinEnded(false);
-        dispatch(setStopRequest(false)); // Set stopRequest to false after spin ends
+        setWinnerDisplay(""); 
+        setShowCelebration(false); // Hide celebration after 10 seconds
+        dispatch(setStopRequest(false)); 
+        router.push(`?round=${"wait"}`, {scroll: false,});
       }, 10000);
 
       return () => clearTimeout(resetTimer);
@@ -137,9 +151,25 @@ const Chart = () => {
           <Doughnut data={chartData} width={400} height={400} options={options} />
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-4xl font-bold text-white">{solAmount} SOL</p>
+          {spinEnded && winnerDisplay ? (
+            <>
+            <p className="text-2xl font-bold text-white uppercase">{winnerDisplay.slice(0, 4) +
+              "..." + winnerDisplay.slice(-4)}</p>
+            </>
+          ) : (
+            <p className="text-4xl font-bold text-white">{solAmount} SOL</p>
+          )}
         </div>
       </div>
+
+      {/* Fullscreen Celebration */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-10">
+          <Confetti width={window.innerWidth} height={window.innerHeight} />
+          <div className="flex flex-col items-center text-white">
+          </div>
+        </div>
+      )}
     </div>
   );
 };

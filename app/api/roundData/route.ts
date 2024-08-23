@@ -4,7 +4,7 @@ import Round from "@/models/Round";
 import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
-const duration = 1 * 60 * 1000; // 1mins
+const duration = 5 * 60 * 1000; // 5mins
 
 interface Player {
   address: string;
